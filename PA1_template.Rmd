@@ -1,0 +1,61 @@
+# Code for reading in the dataset and/or processing the data
+```{r echo=TRUE}
+data1<-read.csv("activity.csv")
+summary(data1)
+```
+## mean total number of steps taken per day.
+```{r}
+stepsbyday <- tapply(data1$steps, data1$date, sum, na.rm=TRUE)
+```
+###  Histogram of the total number of steps taken each day
+```{r echo=TRUE}
+hist(stepsbyday)
+```
+### mean and medain of step each day
+```{r echo=TRUE}
+mean(stepsbyday)
+median(stepsbyday)
+```
+### Average daily activity pattern?
+```{r echo=TRUE}
+average <- aggregate(x=list(meanSteps=data1$steps), by=list(interval=data1$interval), FUN=mean, na.rm=TRUE)
+```
+#####  Time series plot
+```{r echo=TRUE}
+plot(average$interval,average$meanSteps,type="l")
+```
+### get max value
+```{r echo=TRUE}
+max<- which.max(average$meanSteps)
+```
+#####  The total number of missing values in the dataset 
+
+```{r}
+numMissingValues <- length(which(is.na(data1$steps)))
+```
+### remove NA value and create new data set
+```{r echo=TRUE}
+data2<-na.omit(data1)
+#data2[1]<-mean(data2$steps,na.rm=TRUE)
+
+```
+#####  Histogram of the total number of steps taken each day 
+```{r echo=TRUE}
+stepsByDayImputed <- tapply(data2$steps, data2$date, sum)
+hist(stepsByDayImputed)
+```
+### get mean and medain
+```{r echo=TRUE}
+stepsByDayMeanImputed <- mean(stepsByDayImputed)
+stepsByDayMedianImputed <- median(stepsByDayImputed)
+```
+### weekend or week day
+```{r echo=TRUE}
+data2$dateType <-  ifelse(as.POSIXlt(data2$date)$wday %in% c(0,6), 'weekend', 'weekday')
+```
+#####  Panel plot containing a time series plot
+```{r echo=TRUE}
+averagedActivityDataImputed <- aggregate(steps ~ interval + dateType, data=data2, mean)
+plot(averagedActivityDataImputed$interval,averagedActivityDataImputed$steps,type="l")  
+  
+```
